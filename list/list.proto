@@ -1,0 +1,21 @@
+syntax = "proto3";
+package list;
+
+service List {
+    // Sending user input funcationlity
+    rpc ProcessInput(InputMsg) returns (InputResponse) {}
+    // Linking to Linked List
+    rpc InsertInput(InputMsg) returns (InputResponse) {}
+}
+
+message InputMsg {
+    int32 data = 1;
+}
+
+message InputResponse {
+    int32 resp = 1;
+}
+
+message Nodes {
+    int32 node = 1;
+}
