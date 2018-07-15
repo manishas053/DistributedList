@@ -6,7 +6,8 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-
+	"github.com/Nik-U/pbc"
+	"crypto/sha256"
 	pb "github.com/DistributedList/list"
 )
 
@@ -35,29 +36,38 @@ type List struct {
 }
 
 func (L *List) InsertInput(ctx context.Context, in *pb.InputMsg) (*pb.InputResponse, error) {
-	log.Printf("Input Message %v", in.Data)
-	value := 2
-	response := int32(value)
-	return &pb.InputResponse{Resp: response}, nil
+	params, _ := pbc.NewPairingFromString(in.SharedParams)
+	privateKey := params.NewZr().Rand()
+  message := "some text to sign"
+  h := params.NewG1().SetFromStringHash(message, sha256.New())
+	sign := params.NewG2().PowZn(h, privateKey)
+	signature := sign.Bytes()
+	log.Printf("Signature %v", signature)
+
+	return &pb.InputResponse{Resp: signature}, nil
 }
 
 //Function to do multicast to all the replicas
 func (L *List) ProcessInput(ctx context.Context, in *pb.InputMsg) (*pb.InputResponse, error) {
 	//value := 0
-	for _, replica := range L.replicas {
-		cliConn, err := grpc.Dial(replica, grpc.WithInsecure())
+	const (
+	address = "localhost:50055"
+	)
+	//for _, replica := range L.replicas {
+		cliConn, err := grpc.Dial(address, grpc.WithInsecure())
 		if err != nil {
 			log.Fatalf("Didn't connect %v", err)
 		}
 		multiserver := pb.NewListClient(cliConn)
-		resp, err := multiserver.InsertInput(context.Background(), &pb.InputMsg{Data: 2})
+		resp, err := multiserver.InsertInput(context.Background(), &pb.InputMsg{SharedParams : in.SharedParams, SharedG : in.SharedG})
 		if err != nil {
 			log.Printf("Error connecting %v", err)
 		}
 		log.Print(resp)
 		//value = value + resp
-	}
-	return &pb.InputResponse{Resp: 1}, nil
+		response := resp.Resp
+	//}
+	return &pb.InputResponse{Resp: response}, nil
 }
 
 func main() {

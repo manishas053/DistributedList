@@ -9,11 +9,12 @@ service List {
 }
 
 message InputMsg {
-    int32 data = 1;
+    string sharedParams = 1;
+    bytes sharedG = 2;
 }
 
 message InputResponse {
-    int32 resp = 1;
+    bytes resp = 1;
 }
 
 message Nodes {

@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-
+	"bytes"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-
+	"github.com/Nik-U/pbc"
 	pb "github.com/DistributedList/list"
 )
 
@@ -15,12 +15,13 @@ const (
 )
 
 func adding(client pb.ListClient, in *pb.InputMsg) {
+	var temp []byte
 	resp, err := client.ProcessInput(context.Background(), in)
 	if err != nil {
 		log.Fatalf("node couldn't insert %v", err)
 	}
-	if resp.Resp != 0 {
-		log.Printf("New Node inserted %v", in.Data)
+	if !bytes.Equal(resp.Resp, temp) {
+		log.Printf("Aggregate at the root is : %v", resp.Resp)
 	}
 }
 
@@ -33,6 +34,12 @@ func main() {
 	defer conn.Close()
 	client := pb.NewListClient(conn)
 
-	in := &pb.InputMsg{Data: 1}
+
+	params := pbc.GenerateA(160, 512)
+  pairing := params.NewPairing()
+ 	g := pairing.NewG2().Rand()
+
+	in := &pb.InputMsg{SharedParams : params.String(), SharedG : g.Bytes()}
+
 	adding(client, in)
 }
