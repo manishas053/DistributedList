@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net"
-
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"github.com/Nik-U/pbc"
@@ -42,7 +41,6 @@ func (L *List) InsertInput(ctx context.Context, in *pb.InputMsg) (*pb.InputRespo
 	h := params.NewG1().SetFromStringHash(message, sha256.New())
 	sign := params.NewG2().PowZn(h, privateKey)
 	signature := sign.Bytes()
-	log.Printf("Signature %v", signature)
 
 	return &pb.InputResponse{Resp: signature}, nil
 }
@@ -50,7 +48,7 @@ func (L *List) InsertInput(ctx context.Context, in *pb.InputMsg) (*pb.InputRespo
 //Function to do multicast to all the replicas
 func (L *List) ProcessInput(ctx context.Context, in *pb.InputMsg) (*pb.InputResponse, error) {
 	const (
-	address = "localhost:50054"
+	address = "10.1.2.2:50054"
 	)
 	//for _, replica := range L.replicas {
 		cliConn, err := grpc.Dial(address, grpc.WithInsecure())
@@ -77,8 +75,8 @@ func main() {
 	}
 	l := List{}
 	l.id = 1
-	l.address = "localhost:50054"
-	l.replicas = append(l.replicas, "localhost:50050", "localhost:50054")
+	l.address = "10.1.2.2:50054"
+	l.replicas = append(l.replicas, "10.1.1.3:50050", "10.1.2.2:50054")
 	s := grpc.NewServer()
 	pb.RegisterListServer(s, &l)
 	s.Serve(lis)

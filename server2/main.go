@@ -86,7 +86,9 @@ func (L *List) ProcessInput(ctx context.Context, in *pb.InputMsg) (*pb.InputResp
 			//log.Printf("Aggregate is : %v", aggregate)
 		}
 	}
+
 	aggregate_sum := aggregate.Bytes()
+
 	return &pb.InputResponse{Resp: aggregate_sum}, nil
 }
 
@@ -98,8 +100,8 @@ func main() {
 	}
 	l := List{}
 	l.id = 1
-	l.address = "localhost:50052"
-	l.replicas = append(l.replicas, "localhost:50055", "localhost:50056")
+	l.address = "10.1.3.3:50052"
+	l.replicas = append(l.replicas, "10.1.3.2:50055", "10.1.5.2:50056")
 	s := grpc.NewServer()
 	pb.RegisterListServer(s, &l)
 	s.Serve(lis)

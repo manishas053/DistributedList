@@ -5,7 +5,6 @@ import (
 	"net"
 	"sync"
 	"fmt"
-
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"github.com/Nik-U/pbc"
@@ -87,7 +86,10 @@ func (L *List) ProcessInput(ctx context.Context, in *pb.InputMsg) (*pb.InputResp
 			log.Printf("Aggregate is : %v", aggregate)
 		}
 	}
+
+
 	aggregate_sum := aggregate.Bytes()
+
 	log.Printf("aggregate: %v", aggregate_sum)
 	return &pb.InputResponse{Resp: aggregate_sum}, nil
 }
@@ -99,8 +101,8 @@ func main() {
 	}
 	l := List{}
 	l.id = 1
-	l.address = "localhost:50050"
-	l.replicas = append(l.replicas, "localhost:50053", "localhost:50054")
+	l.address = "10.1.1.3:50050"
+	l.replicas = append(l.replicas, "10.1.1.2:50053", "10.1.2.2:50054")
 	s := grpc.NewServer()
 	pb.RegisterListServer(s, &l)
 	s.Serve(lis)

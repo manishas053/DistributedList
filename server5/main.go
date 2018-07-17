@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net"
-
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"github.com/Nik-U/pbc"
@@ -51,7 +50,7 @@ func (L *List) InsertInput(ctx context.Context, in *pb.InputMsg) (*pb.InputRespo
 func (L *List) ProcessInput(ctx context.Context, in *pb.InputMsg) (*pb.InputResponse, error) {
 	//value := 0
 	const (
-	address = "localhost:50055"
+	address = "10.1.3.2:50055"
 	)
 	//for _, replica := range L.replicas {
 		cliConn, err := grpc.Dial(address, grpc.WithInsecure())
@@ -77,8 +76,8 @@ func main() {
 	}
 	l := List{}
 	l.id = 1
-	l.address = "localhost:50055"
-	l.replicas = append(l.replicas, "localhost:50055", "localhost:50052")
+	l.address = "10.1.3.2:50055"
+	l.replicas = append(l.replicas, "10.1.3.2:50055", "10.1.3.3:50052")
 	s := grpc.NewServer()
 	pb.RegisterListServer(s, &l)
 	s.Serve(lis)

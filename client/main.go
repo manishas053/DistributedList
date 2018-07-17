@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"time"
+	"fmt"
 	"bytes"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -10,19 +12,21 @@ import (
 )
 
 const (
-	address     = "localhost:50051"
+	address     = "10.1.4.3:50051"
 	defaultName = "list"
 )
 
 func adding(client pb.ListClient, in *pb.InputMsg) {
+	start := time.Now()
 	var temp []byte
 	resp, err := client.ProcessInput(context.Background(), in)
 	if err != nil {
 		log.Fatalf("node couldn't insert %v", err)
 	}
 	if !bytes.Equal(resp.Resp, temp) {
-		log.Printf("Aggregate at the root is : %v", resp.Resp)
+		log.Printf("BLS Multisignature aggregate at the root is :\n %v", resp.Resp)
 	}
+	fmt.Println("Time taken to compute BLS multisignature : ", time.Since(start))
 }
 
 func main() {
